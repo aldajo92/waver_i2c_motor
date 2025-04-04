@@ -32,9 +32,15 @@ public:
 
         RCLCPP_INFO(this->get_logger(), "I2C bus initialized successfully.");
 
+        // Subscribe to cmd_vel
         subscription_ = this->create_subscription<geometry_msgs::msg::Twist>(
             "cmd_vel", 10,
             std::bind(&MotorController::motorCallback, this, std::placeholders::_1));
+
+        // Timer to send commands at fixed frequency (e.g., 10 Hz)
+        timer_ = this->create_wall_timer(
+            std::chrono::milliseconds(100),
+            std::bind(&MotorController::sendMotorCommand, this));
 
         RCLCPP_INFO(this->get_logger(), "Motor controller node started.");
     }
@@ -48,8 +54,17 @@ public:
 
 private:
     void motorCallback(const geometry_msgs::msg::Twist::SharedPtr msg) {
-        int16_t left_motor = static_cast<int16_t>(msg->linear.x * 100 - msg->angular.z * 50);
-        int16_t right_motor = static_cast<int16_t>(msg->linear.x * 100 + msg->angular.z * 50);
+        latest_twist_ = *msg;  // store latest message
+    }
+
+    void sendMotorCommand() {
+        int16_t left_motor = static_cast<int16_t>(latest_twist_.linear.x * 180 - latest_twist_.angular.z * 250);
+        int16_t right_motor = static_cast<int16_t>(latest_twist_.linear.x * 180 + latest_twist_.angular.z * 250);
+
+        if (left_motor > 255) left_motor = 255;
+        if (left_motor < -255) left_motor = -255;
+        if (right_motor > 255) right_motor = 255;
+        if (right_motor < -255) right_motor = -255;
 
         unsigned char data[6];
         data[0] = 0x00;                 // Dummy register
@@ -68,7 +83,9 @@ private:
     }
 
     int file_;
+    geometry_msgs::msg::Twist latest_twist_;  // stores the last received twist message
     Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_;
+    TimerBase::SharedPtr timer_;
 };
 
 int main(int argc, char *argv[]) {
