@@ -78,7 +78,7 @@ private:
         if (written != sizeof(data)) {
             RCLCPP_ERROR(this->get_logger(), "Failed to write to the I2C bus.");
         } else {
-            RCLCPP_INFO(this->get_logger(), "Sent [L: %d, R: %d]", left_motor, right_motor);
+            // RCLCPP_INFO(this->get_logger(), "Sent [L: %d, R: %d]", left_motor, right_motor);
         }
     }
 
