@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#include <std_msgs/msg/string.hpp>
 
 #include <linux/i2c-dev.h>
 
@@ -42,6 +43,9 @@ public:
             std::chrono::milliseconds(100),
             std::bind(&MotorController::sendMotorCommand, this));
 
+        // Initialize the publisher for motor feedback
+        feedback_publisher_ = this->create_publisher<std_msgs::msg::String>("motor_controller_feedback", 10);
+
         RCLCPP_INFO(this->get_logger(), "Motor controller node started.");
     }
 
@@ -75,17 +79,23 @@ private:
         data[5] = right_motor & 0xFF;
 
         ssize_t written = write(file_, data, sizeof(data));
+        auto feedback_msg = std_msgs::msg::String();
+
         if (written != sizeof(data)) {
-            RCLCPP_ERROR(this->get_logger(), "Failed to write to the I2C bus.");
+            feedback_msg.data = "Failed I2C";
         } else {
-            // RCLCPP_INFO(this->get_logger(), "Sent [L: %d, R: %d]", left_motor, right_motor);
+            feedback_msg.data = "L:" + std::to_string(left_motor) + ",R:" + std::to_string(right_motor) + "";
         }
+
+        // Publish the feedback message
+        feedback_publisher_->publish(feedback_msg);
     }
 
     int file_;
     geometry_msgs::msg::Twist latest_twist_;  // stores the last received twist message
     Subscription<geometry_msgs::msg::Twist>::SharedPtr subscription_;
     TimerBase::SharedPtr timer_;
+    Publisher<std_msgs::msg::String>::SharedPtr feedback_publisher_; // Publisher for feedback
 };
 
 int main(int argc, char *argv[]) {
