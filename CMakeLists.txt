@@ -8,26 +8,32 @@ endif()
 # Dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
-# Executable
-add_executable(i2c_motor_node src/i2c_motor_node.cpp)
-ament_target_dependencies(i2c_motor_node rclcpp std_msgs geometry_msgs)
+# Executable for motor_node
+add_executable(motor_node src/motor_node.cpp)
+ament_target_dependencies(motor_node rclcpp geometry_msgs)
 
 # Link libi2c (available via libi2c-dev)
-target_link_libraries(i2c_motor_node i2c)
+target_link_libraries(motor_node i2c)
+
+# Executable for velocity_node
+add_executable(velocity_node src/velocity_node.cpp)
+ament_target_dependencies(velocity_node rclcpp geometry_msgs)
+
+# Link libi2c for velocity_node
+target_link_libraries(velocity_node i2c)
 
 # Install
-install(TARGETS i2c_motor_node
+install(TARGETS
+  motor_node 
+  velocity_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
 # Optional Linting
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  set(ament_cmake_copyright_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
 
