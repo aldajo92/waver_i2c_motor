@@ -72,7 +72,9 @@ private:
         vel_pub_->publish(twist);
 
         std_msgs::msg::String msg;
-        msg.data = "v_l: " + std::to_string(v_l) + ", v_r: " + std::to_string(v_r);
+        char str_buffer[64];
+        snprintf(str_buffer, sizeof(str_buffer), "L:%.1f,R:%.1f", v_l, v_r);
+        msg.data = std::string(str_buffer);
         vel_string_pub_->publish(msg);
     }
 
