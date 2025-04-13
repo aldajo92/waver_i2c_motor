@@ -9,6 +9,7 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 # Executable for motor_node
 add_executable(motor_node src/motor_node.cpp)
@@ -19,7 +20,7 @@ target_link_libraries(motor_node i2c)
 
 # Executable for velocity_node
 add_executable(velocity_node src/velocity_node.cpp)
-ament_target_dependencies(velocity_node rclcpp geometry_msgs)
+ament_target_dependencies(velocity_node rclcpp geometry_msgs sensor_msgs)
 
 # Link libi2c for velocity_node
 target_link_libraries(velocity_node i2c)
