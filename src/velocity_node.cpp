@@ -18,9 +18,11 @@ public:
         declare_parameter("i2c_address", 0x11);
         declare_parameter("wheel_radius", 0.08); // in meters
         declare_parameter("wheel_base", 0.128);  // in meters
-        declare_parameter("polling_rate_hz", 10.0);
-        declare_parameter("left_wheel_joint_name", "left_wheel_joint");
-        declare_parameter("right_wheel_joint_name", "right_wheel_joint");
+        declare_parameter("polling_rate_hz", 5.0);
+        declare_parameter("left_wheel_joint_name", "wheel_front_left_joint");
+        declare_parameter("right_wheel_joint_name", "wheel_front_right_joint");
+        declare_parameter("left_wheel_back_joint_name", "wheel_back_left_joint");
+        declare_parameter("right_wheel_back_joint_name", "wheel_back_right_joint");
 
         get_parameter("i2c_device", i2c_device_);
         get_parameter("i2c_address", i2c_address_);
@@ -30,6 +32,8 @@ public:
         get_parameter("polling_rate_hz", freq);
         get_parameter("left_wheel_joint_name", left_wheel_joint_name);
         get_parameter("right_wheel_joint_name", right_wheel_joint_name);
+        get_parameter("left_wheel_back_joint_name", left_wheel_back_joint_name);
+        get_parameter("right_wheel_back_joint_name", right_wheel_back_joint_name);
 
         vel_pub_ = create_publisher<geometry_msgs::msg::Twist>("/vel_from_i2c", 10);
         vel_string_pub_ = create_publisher<std_msgs::msg::String>("/vel_from_i2c_string", 10);
@@ -96,8 +100,9 @@ private:
         // Publish joint states
         sensor_msgs::msg::JointState joint_state;
         joint_state.header.stamp = current_time;
-        joint_state.name = {left_wheel_joint_name, right_wheel_joint_name};
-        joint_state.position = {left_wheel_angle_, right_wheel_angle_};
+        joint_state.name = {left_wheel_joint_name, right_wheel_joint_name, 
+                            left_wheel_back_joint_name, right_wheel_back_joint_name};
+        joint_state.position = {left_wheel_angle_, right_wheel_angle_, 0.0, 0.0};
         joint_pub_->publish(joint_state);
     }
 
@@ -106,7 +111,8 @@ private:
     double wheel_radius, wheel_base;
     int file_;
     double left_wheel_angle_, right_wheel_angle_;
-    std::string left_wheel_joint_name, right_wheel_joint_name;
+    std::string left_wheel_joint_name, right_wheel_joint_name, 
+        left_wheel_back_joint_name, right_wheel_back_joint_name;
     rclcpp::Time last_time_;
 
     rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr vel_pub_;
