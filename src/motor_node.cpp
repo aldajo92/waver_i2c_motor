@@ -62,8 +62,8 @@ private:
     }
 
     void sendMotorCommand() {
-        int16_t left_motor = static_cast<int16_t>(latest_twist_.linear.x * 180 - latest_twist_.angular.z * 250);
-        int16_t right_motor = static_cast<int16_t>(latest_twist_.linear.x * 180 + latest_twist_.angular.z * 250);
+        int16_t left_motor = static_cast<int16_t>(latest_twist_.linear.x * 150 - latest_twist_.angular.z * 160);
+        int16_t right_motor = static_cast<int16_t>(latest_twist_.linear.x * 150 + latest_twist_.angular.z * 160);
 
         if (left_motor > 255) left_motor = 255;
         if (left_motor < -255) left_motor = -255;
